@@ -163,7 +163,7 @@ def plot_price_series(df):
     ax.plot(df['日期'], df['收盘'], color=COLOR_BLACK, linewidth=0.6)
     ax.set_xlabel('日期')
     ax.set_ylabel('收盘价')
-    ax.set_title('上证综指日收盘价 (2000–2026)', fontweight='bold')
+    ax.set_title('上证综指日收盘价 (2000–2026)')
     ax.set_facecolor(COLOR_WHITE)
     ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
     fig.tight_layout()
@@ -178,7 +178,7 @@ def plot_return_series(df):
     ax.axhline(y=0, color=COLOR_REF, linestyle='--', linewidth=0.8)
     ax.set_xlabel('日期')
     ax.set_ylabel('对数收益率 (%)')
-    ax.set_title('上证综指日对数收益率 (2000–2026)', fontweight='bold')
+    ax.set_title('上证综指日对数收益率 (2000–2026)')
     ax.set_facecolor(COLOR_WHITE)
     ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
     fig.tight_layout()
@@ -228,14 +228,14 @@ def plot_acf_pacf_individual(arima_resid):
 
         ax.set_xlabel('滞后阶数')
         ax.set_ylabel('值')
-        ax.set_title(title, fontweight='bold')
+        ax.set_title(title)
         ax.set_facecolor(COLOR_WHITE)
         ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
         ax.set_xlim(0.5, nlags + 0.5)
 
-        # 标注CI
-        ax.annotate('95% CI', xy=(nlags * 0.85, ci95 * 1.15), fontsize=8,
-                    color=COLOR_DARK, ha='center')
+        # # 标注CI
+        # ax.annotate('95% CI', xy=(nlags * 0.85, ci95 * 1.15), fontsize=8,
+        #             color=COLOR_DARK, ha='center')
 
         fig.tight_layout()
         _savefig(fig, filenames[key])
@@ -255,7 +255,7 @@ def plot_conditional_volatility(cond_vol, model_names):
                 alpha=0.85, label=sty['label'])
     ax.set_xlabel('观测序号')
     ax.set_ylabel('条件波动率')
-    ax.set_title('四模型条件波动率估计对比', fontweight='bold')
+    ax.set_title('四模型条件波动率估计对比')
     ax.legend(fontsize=8, framealpha=0.9, edgecolor=COLOR_BLACK)
     ax.set_facecolor(COLOR_WHITE)
     ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
@@ -278,7 +278,7 @@ def plot_std_resid_timeseries(std_resid, model_names):
         ax.axhline(y=-3, color=COLOR_DARK, linestyle='--', linewidth=0.8, alpha=0.7)
         mu_sr = np.mean(sr); sg_sr = np.std(sr)
         ax.set_title(f'{name}  标准化残差 ($\\bar{{z}}$={mu_sr:.3f}, $\\hat{{\\sigma}}$={sg_sr:.3f})',
-                     fontsize=10, fontweight='bold')
+                     fontsize=10)
         ax.set_facecolor(COLOR_WHITE)
         ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
     axes[-1].set_xlabel('观测序号')
@@ -318,7 +318,7 @@ def plot_qq(std_resid, model_names):
 
         ax.set_xlabel('理论分位数')
         ax.set_ylabel('样本分位数')
-        ax.set_title(f'{name}', fontsize=10, fontweight='bold')
+        ax.set_title(f'{name}', fontsize=10)
         ax.set_facecolor(COLOR_WHITE)
         ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
 
@@ -357,7 +357,7 @@ def plot_std_resid_histogram(std_resid, model_names):
 
         ax.set_xlabel('标准化残差')
         ax.set_ylabel('密度')
-        ax.set_title(name, fontsize=10, fontweight='bold')
+        ax.set_title(name, fontsize=10)
         ax.set_facecolor(COLOR_WHITE)
         ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
         ax.legend(fontsize=8, framealpha=0.9)
@@ -387,7 +387,7 @@ def plot_rolling_forecast(roll_preds, actual_vol, eval_dict, model_names):
 
     ax.set_xlabel('预测步数 (前250步)')
     ax.set_ylabel('波动率')
-    ax.set_title('滚动窗口样本外波动率预测对比', fontweight='bold')
+    ax.set_title('滚动窗口样本外波动率预测对比')
     ax.legend(fontsize=8, framealpha=0.9, edgecolor=COLOR_BLACK)
     ax.set_facecolor(COLOR_WHITE)
     ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
@@ -427,7 +427,7 @@ def plot_evaluation_bar(eval_dict, model_names):
         ax.set_xticks(range(len(model_names)))
         ax.set_xticklabels([n.replace('(1,1)', '') for n in model_names], fontsize=7, rotation=10)
         ax.set_ylabel(metric_labels.get(metric, metric))
-        ax.set_title(metric_labels.get(metric, metric), fontsize=10, fontweight='bold')
+        ax.set_title(metric_labels.get(metric, metric), fontsize=10)
 
         # 数值标注
         for bar, val in zip(bars, values):
