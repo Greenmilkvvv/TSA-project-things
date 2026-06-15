@@ -12,6 +12,7 @@ import os, sys, warnings, logging
 import numpy as np
 import pandas as pd
 from scipy import stats as sc_stats
+from scipy.stats import norm as norm_dist
 from statsmodels.tsa.stattools import acf, pacf
 
 warnings.filterwarnings('ignore')
@@ -22,16 +23,17 @@ warnings.filterwarnings('ignore')
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-plt.rcParams['font.family'] = ['Times New Roman', 'SimSun']  # 英文字体优先，中文回退到宋体
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'SimSun', 'Arial', 'DejaVu Sans']
 plt.rcParams['mathtext.fontset'] = 'stix'  # 数学公式字体，与Times风格匹配
 plt.rcParams['axes.unicode_minus'] = False              # 正常显示负号 (重要！) 
 
 # ===== 配色方案：黑白学术风 =====
 COLOR_BLACK = '#000000'
 COLOR_WHITE = '#FFFFFF'
-COLOR_DARK  = '#333333'   # 深灰（CI线、网格）
-COLOR_GRID  = '#CCCCCC'   # 极浅灰网格
-COLOR_REF   = '#666666'   # 参考线灰色
+COLOR_DARK  = '#111111'   # 深灰（CI线、网格）
+COLOR_GRID  = '#AAAAAA'   # 浅灰网格
+COLOR_REF   = '#333333'   # 参考线灰色
 
 # 四模型线型区分（全黑色，黑白打印友好）
 MODEL_STYLES = {
@@ -46,6 +48,13 @@ MODEL_HATCHES = {
     'GARCH(1,1)-t':  '\\\\\\',
     'EGARCH(1,1)-t': 'xxx',
     'APARCH(1,1)-t': '...',
+}
+
+MODEL_COLORS = {
+    'GARCH(1,1)-N':   '#000000',
+    'GARCH(1,1)-t':   '#E69F00',
+    'EGARCH(1,1)-t':  '#0072B2',
+    'APARCH(1,1)-t':  '#009E73',
 }
 
 # ===== 输出目录 =====
@@ -249,7 +258,8 @@ def plot_conditional_volatility(cond_vol, model_names):
         if len(cv) == 0:
             continue
         sty = MODEL_STYLES.get(name, {'ls': '-', 'lw': 1.0})
-        ax.plot(np.arange(len(cv)), cv, color=COLOR_BLACK,
+        clr = MODEL_COLORS.get(name, COLOR_BLACK)
+        ax.plot(np.arange(len(cv)), cv, color=clr,
                 linestyle=sty['ls'], linewidth=sty['lw'],
                 alpha=0.85, label=sty['label'])
     ax.set_xlabel('观测序号')
@@ -332,8 +342,6 @@ def plot_std_resid_histogram(std_resid, model_names):
     logger.info("[10] 标准化残差直方图 (2×2)")
     fig, axes = plt.subplots(2, 2, figsize=TWO_BY_TWO)
 
-    from scipy.stats import norm as norm_dist
-
     for idx, name in enumerate(model_names):
         ax = axes[idx // 2, idx % 2]
         sr = std_resid.get(name, np.array([]))
@@ -344,16 +352,11 @@ def plot_std_resid_histogram(std_resid, model_names):
                 facecolor=COLOR_WHITE, edgecolor=COLOR_BLACK, linewidth=0.6)
 
         x = np.linspace(sr.min(), sr.max(), 500)
-        ax.plot(x, norm_dist.pdf(x, 0, 1), color=COLOR_BLACK, linewidth=1.2,
-                linestyle='--', label=r'$\mathcal{N}(0,1)$')
-
-        # 标注统计量
         sk = sc_stats.skew(sr)
         ku = sc_stats.kurtosis(sr, fisher=True)
-        ax.text(0.97, 0.93, f'偏度={sk:.3f}\n超额峰度={ku:.3f}',
-                transform=ax.transAxes, fontsize=8, ha='right', va='top',
-                bbox=dict(boxstyle='round,pad=0.3', facecolor=COLOR_WHITE,
-                          edgecolor=COLOR_BLACK, linewidth=0.5))
+        label = r'$\mathcal{N}(0,1)$' + '\n偏度={:.3f}\n超额峰度={:.3f}'.format(sk, ku)
+        ax.plot(x, norm_dist.pdf(x, 0, 1), color=COLOR_BLACK, linewidth=1.2,
+                linestyle='--', label=label)
 
         ax.set_xlabel('标准化残差')
         ax.set_ylabel('密度')
@@ -397,8 +400,7 @@ def plot_rolling_forecast(roll_preds, actual_vol, eval_dict, model_names):
 
 # ====================== 图12: 评估指标柱状图 (四指标, 使用 LaTeX) ======================
 def plot_evaluation_bar(eval_dict, model_names):
-    logger.info("[12] 评估指标柱状图 (4指标 x 4子图)")
-    fig, axes = plt.subplots(2, 2, figsize=TWO_BY_TWO)
+    logger.info("[12] 评估指标柱状图 (簇状分组)")
 
     metrics = ['RMSE', 'MAE', 'SMAPE(%)', 'QLIKE']
     metric_labels = {
@@ -408,35 +410,57 @@ def plot_evaluation_bar(eval_dict, model_names):
         'QLIKE': 'QLIKE',
     }
 
-    for idx, metric in enumerate(metrics):
-        ax = axes[idx // 2, idx % 2]
-        values = [eval_dict.get(n, {}).get(metric, np.nan) for n in model_names]
-        bars = ax.bar(range(len(model_names)), values,
-                      facecolor=COLOR_WHITE, edgecolor=COLOR_BLACK, linewidth=1.0)
+    METRIC_COLORS = {
+        'RMSE': '#000000',
+        'MAE': '#E69F00',
+        'SMAPE(%)': '#0072B2',
+        'QLIKE': '#009E73',
+    }
 
-        # hatch 图案区分
-        for bar, name in zip(bars, model_names):
-            bar.set_hatch(MODEL_HATCHES.get(name, '///'))
+    # 准备数据
+    data = {}
+    for metric in metrics:
+        data[metric] = [eval_dict.get(n, {}).get(metric, np.nan) for n in model_names]
 
-        # 最优加粗边框
-        if not all(np.isnan(v) for v in values):
-            best_idx = np.nanargmin(values)
+    n_models = len(model_names)
+    n_metrics = len(metrics)
+    bar_width = 0.18
+    x = np.arange(n_models)
+
+    # 确定 Y 轴范围（留更多空间放大差异）
+    all_vals = [v for metric in metrics for v in data[metric] if not np.isnan(v)]
+    y_min = min(all_vals) * 0.95 if all_vals else 0
+    y_max = max(all_vals) * 1.08 if all_vals else 1
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    for i, metric in enumerate(metrics):
+        offset = (i - n_metrics / 2 + 0.5) * bar_width
+        vals = data[metric]
+        bars = ax.bar(x + offset, vals, bar_width,
+                      color=METRIC_COLORS[metric], edgecolor=COLOR_BLACK,
+                      linewidth=0.8, label=metric_labels.get(metric, metric))
+
+        # 最优值加粗边框
+        if not all(np.isnan(v) for v in vals):
+            best_idx = np.nanargmin(vals)
             bars[best_idx].set_edgecolor(COLOR_BLACK)
             bars[best_idx].set_linewidth(2.5)
 
-        ax.set_xticks(range(len(model_names)))
-        ax.set_xticklabels([n.replace('(1,1)', '') for n in model_names], fontsize=7, rotation=10)
-        ax.set_ylabel(metric_labels.get(metric, metric))
-        ax.set_title(metric_labels.get(metric, metric), fontsize=10)
-
         # 数值标注
-        for bar, val in zip(bars, values):
+        for bar, val in zip(bars, vals):
             if not np.isnan(val):
                 ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
                         f'{val:.4f}', ha='center', va='bottom', fontsize=7.5)
 
-        ax.set_facecolor(COLOR_WHITE)
-        ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4, axis='y')
+    ax.set_xticks(x)
+    ax.set_xticklabels([n.replace('(1,1)', '') for n in model_names], fontsize=12)
+    ax.set_ylabel('值')
+    ax.set_title('滚动窗口样本外预测评估指标对比')
+    ax.set_ylim(y_min, y_max)
+    ax.legend(fontsize=10, framealpha=0.9, edgecolor=COLOR_BLACK, ncol=4)
+    ax.set_facecolor(COLOR_WHITE)
+    ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4, axis='y')
 
     fig.tight_layout()
     _savefig(fig, 'fig_eval_bar.pdf')
