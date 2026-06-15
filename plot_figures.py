@@ -11,10 +11,6 @@
 import os, sys, warnings, logging
 import numpy as np
 import pandas as pd
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 from scipy import stats as sc_stats
 from statsmodels.tsa.stattools import acf, pacf
 
@@ -23,9 +19,12 @@ warnings.filterwarnings('ignore')
 # ===== 字体与数学公式 =====
 # matplotlib 3.7 中 font.family 列表回退在 mathtext 混合中文时不生效，
 # 改用 SimSun 统一字体（宋体，兼容拉丁/CJK，学术风格）
-plt.rcParams['font.family'] = 'SimSun'
-plt.rcParams['mathtext.fontset'] = 'stix'
-plt.rcParams['axes.unicode_minus'] = False
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams['font.family'] = ['Times New Roman', 'SimSun']  # 英文字体优先，中文回退到宋体
+plt.rcParams['mathtext.fontset'] = 'stix'  # 数学公式字体，与Times风格匹配
+plt.rcParams['axes.unicode_minus'] = False              # 正常显示负号 (重要！) 
 
 # ===== 配色方案：黑白学术风 =====
 COLOR_BLACK = '#000000'
@@ -68,12 +67,12 @@ TWO_BY_TWO = (8.0, 7.5)                 # 2x2 子图
 FOUR_ROW   = (6.3, 8.0)                 # 4行子图
 
 # 全局字体大小 (相对于小尺寸图片)
-plt.rcParams['font.size'] = 10
-plt.rcParams['axes.titlesize'] = 11
-plt.rcParams['axes.labelsize'] = 10
-plt.rcParams['xtick.labelsize'] = 9
-plt.rcParams['ytick.labelsize'] = 9
-plt.rcParams['legend.fontsize'] = 8
+plt.rcParams['font.size'] = 12
+plt.rcParams['axes.titlesize'] = 13
+plt.rcParams['axes.labelsize'] = 12
+plt.rcParams['xtick.labelsize'] = 11
+plt.rcParams['ytick.labelsize'] = 11
+plt.rcParams['legend.fontsize'] = 12
 
 
 def _parse_dates_from_df(df):
@@ -277,7 +276,8 @@ def plot_std_resid_timeseries(std_resid, model_names):
         ax.axhline(y=3, color=COLOR_DARK, linestyle='--', linewidth=0.8, alpha=0.7)
         ax.axhline(y=-3, color=COLOR_DARK, linestyle='--', linewidth=0.8, alpha=0.7)
         mu_sr = np.mean(sr); sg_sr = np.std(sr)
-        ax.set_title(f'{name}  标准化残差 ($\\bar{{z}}$={mu_sr:.3f}, $\\hat{{\\sigma}}$={sg_sr:.3f})',
+        # ax.set_title(f'{name}  标准化残差 ($\\bar{{z}}$={mu_sr:.3f}, $\\hat{{\\sigma}}$={sg_sr:.3f})',
+        ax.set_title(f'{name}  标准化残差 ($\\bar{{\\mu}}$={mu_sr:.3f}, $\\hat{{\\sigma}}$={sg_sr:.3f})',
                      fontsize=10)
         ax.set_facecolor(COLOR_WHITE)
         ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
@@ -397,7 +397,7 @@ def plot_rolling_forecast(roll_preds, actual_vol, eval_dict, model_names):
 
 # ====================== 图12: 评估指标柱状图 (四指标, 使用 LaTeX) ======================
 def plot_evaluation_bar(eval_dict, model_names):
-    logger.info("[12] 评估指标柱状图 (4指标 × 4子图)")
+    logger.info("[12] 评估指标柱状图 (4指标 x 4子图)")
     fig, axes = plt.subplots(2, 2, figsize=TWO_BY_TWO)
 
     metrics = ['RMSE', 'MAE', 'SMAPE(%)', 'QLIKE']
