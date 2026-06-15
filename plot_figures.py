@@ -18,13 +18,15 @@ from statsmodels.tsa.stattools import acf, pacf
 warnings.filterwarnings('ignore')
 
 # ===== 字体与数学公式 =====
-# matplotlib 3.7 中 font.family 列表回退在 mathtext 混合中文时不生效，
-# 改用 SimSun 统一字体（宋体，兼容拉丁/CJK，学术风格）
+# SimHei（黑体）优先保证中英文兼容，次选 SimSun、Microsoft YaHei
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-plt.rcParams['font.family'] = 'sans-serif'
-plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'SimSun', 'Arial', 'DejaVu Sans']
+# plt.rcParams['font.family'] = 'sans-serif'
+# plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'SimSun']
+# plt.rcParams['mathtext.fontset'] = 'stix'  # stix 与 Times New Roman 风格一致
+# plt.rcParams['axes.unicode_minus'] = False              # 正常显示负号 (重要！) 
+plt.rcParams['font.family'] = ['SimSun', 'Times New Roman']  # 英文字体优先，中文回退到宋体
 plt.rcParams['mathtext.fontset'] = 'stix'  # 数学公式字体，与Times风格匹配
 plt.rcParams['axes.unicode_minus'] = False              # 正常显示负号 (重要！) 
 
@@ -317,9 +319,8 @@ def plot_std_resid_timeseries(std_resid, model_names):
         ax.axhline(y=3, color=COLOR_DARK, linestyle='--', linewidth=0.8, alpha=0.7)
         ax.axhline(y=-3, color=COLOR_DARK, linestyle='--', linewidth=0.8, alpha=0.7)
         mu_sr = np.mean(sr); sg_sr = np.std(sr)
-        # ax.set_title(f'{name}  标准化残差 ($\\bar{{z}}$={mu_sr:.3f}, $\\hat{{\\sigma}}$={sg_sr:.3f})',
-        ax.set_title(f'{name}  标准化残差 (μ̄={mu_sr:.3f}, σ̂={sg_sr:.3f})',
-                     fontsize=10)
+        ax.set_title(f'{name}  ' +'标准化残差' + f' ($\\bar{{z}}$={mu_sr:.3f}, $\\hat{{\\sigma}}$={sg_sr:.3f})', fontsize=10)
+        # ax.set_title(f'{name}  标准化残差 (μ̄={mu_sr:.3f}, σ̂={sg_sr:.3f})', fontsize=10)
         ax.set_facecolor(COLOR_WHITE)
         ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
     axes[-1].set_xlabel('观测序号')
@@ -389,17 +390,17 @@ def plot_std_resid_histogram(std_resid, model_names):
         sk = sc_stats.skew(sr)
         ku = sc_stats.kurtosis(sr, fisher=True)
         info_text = f'偏度={sk:.3f}\n超额峰度={ku:.3f}'
-        ax.text(0.03, 0.95, info_text, transform=ax.transAxes, fontsize=8,
-                verticalalignment='top', family='sans-serif',
+        ax.text(0.03, 0.95, info_text, transform=ax.transAxes, fontsize=10,
+                verticalalignment='top',
                 bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
                           edgecolor=COLOR_BLACK, alpha=0.85))
 
         ax.set_xlabel('标准化残差')
         ax.set_ylabel('密度')
-        ax.set_title(name, fontsize=10)
+        ax.set_title(name, fontsize=13)
         ax.set_facecolor(COLOR_WHITE)
         ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
-        ax.legend(fontsize=8, framealpha=0.9, loc='upper right')
+        ax.legend(fontsize=10, framealpha=0.9, loc='upper right')
 
     fig.tight_layout()
     _savefig(fig, 'fig_std_resid_hist.pdf')
