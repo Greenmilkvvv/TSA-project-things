@@ -316,7 +316,7 @@ def rolling_forecast(models, resid_full, best_name):
     滚动窗口预测 (rolling forecast)：
     训练窗口 = 前 90% 数据
     每次向前滚动 1 步，重新估计所有模型
-    每 50 步重新估计一次以节省时间
+    每 1 步重新估计一次以节省时间
     """
     logger.info("\n" + "=" * 60)
     logger.info("7. 滚动窗口样本外预测 (Rolling Forecast)")
@@ -325,7 +325,7 @@ def rolling_forecast(models, resid_full, best_name):
     T = len(resid_full)
     n_train_init = int(T * 0.90)
     n_test = T - n_train_init
-    re_estimate_every = 50
+    re_estimate_every = 1
 
     logger.info(f"  总观测: {T}, 初始训练集: {n_train_init}, 测试集: {n_test}")
     logger.info(f"  重新估计频率: 每 {re_estimate_every} 步")

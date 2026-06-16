@@ -6,4 +6,4 @@
 波动率模型数,"4 (GARCH-N, GARCH-t, EGARCH-t, APARCH-t)"
 样本内最优,"EGARCH(1,1)-t"
 最优AIC,20379.5766
-样本外最优RMSE,"EGARCH(1,1)-t (0.899187)"
+样本外最优RMSE,"EGARCH(1,1)-t (0.818117)"
