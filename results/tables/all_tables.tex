@@ -1,0 +1,180 @@
+% ============================================================
+% 所有表格  —  LaTeX代码
+% 由 generate_tables.py 自动生成
+% 使用方式: \input{all_tables.tex}  或复制对应表格到论文正文
+% ============================================================
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath}
+
+
+
+\begin{table}[htbp]
+  \centering
+  \caption{Descriptive statistics of daily logarithmic returns.}
+  \label{tab:desc_stats}
+  \begin{tabular}{lc}
+    \toprule
+    Statistic & Value \\
+    \midrule
+    N & 8643 \\
+    Mean (%) & 0.0396 \\
+    Std. Dev. (%) & 2.0968 \\
+    Median (%) & 0.0524 \\
+    Min (%) & -17.9051 \\
+    Max (%) & 71.9152 \\
+    Q1 (%) & -0.6832 \\
+    Q3 (%) & 0.7888 \\
+    Skewness & 5.5063 \\
+    Excess Kurtosis & 176.9019 \\
+    Jarque-Bera & 11300392.8815 \\
+    J-B p-value & 0.0000e+00 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Unit root test results (ADF \& KPSS).}
+  \label{tab:unit_root}
+  \begin{tabular}{lccc}
+    \toprule
+    Test & Statistic & P-value & Conclusion \\
+    \midrule
+    ADF & -12.6088 & 0.0000 & 平稳 \\
+    KPSS & 0.0552 & 0.1000 & 平稳 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{ARCH-LM test for conditional heteroscedasticity.}
+  \label{tab:arch_test}
+  \begin{tabular}{lcc}
+    \toprule
+    Test & Statistic & P-value \\
+    \midrule
+    ARCH-LM lag=10 & 610.4411 & 0.0000 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Ljung-Box test for ARIMA residual white noise.}
+  \label{tab:arima_resid}
+  \begin{tabular}{lcc}
+    \toprule
+    Lag & LB Statistic & P-value \\
+    \midrule
+    6 & 4.0519 & 0.6696 \\
+    12 & 12.8861 & 0.3774 \\
+    18 & 36.0467 & 0.0070 \\
+    24 & 47.5468 & 0.0029 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Parameter estimation results of GARCH-family models.}
+  \label{tab:model_params}
+  \begin{tabular}{lcccccccccc}
+    \toprule
+    模型 & $\omega$ & $\alpha_1$ & $\beta_1$ & $\gamma_1$ & $\delta$ & $\nu$ & $\alpha_1+\beta_1$ & AIC & BIC & LogLik \\
+    \midrule
+    GARCH(1,1)-N & 0.0229 & 0.0776 & 0.9131 &  &  &  & 0.9908 & 20990.6983 & 21010.9900 & -10492.3491 \\
+    GARCH(1,1)-t & 0.0177 & 0.0706 & 0.9240 &  &  & 4.7047 & 0.9946 & 20398.9667 & 20426.0223 & -10195.4834 \\
+    EGARCH(1,1)-t & 0.0155 & 0.1547 & 0.9899 &  &  & 4.7706 & 0.9899 & 20379.5766 & 20406.6322 & -10185.7883 \\
+    APARCH(1,1)-t & 0.0196 & 0.0750 & 0.9250 &  & 1.5532 & 4.9539 & 0.9250 & 20387.3248 & 20421.1442 & -10188.6624 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Model comparison based on information criteria.}
+  \label{tab:model_comp}
+  \begin{tabular}{lcccc}
+    \toprule
+    模型 & AIC & BIC & LogLik & $\alpha_1+\beta_1$ \\
+    \midrule
+    GARCH(1,1)-N & 20990.6983 & 21010.9900 & -10492.3491 & 0.9908 \\
+    GARCH(1,1)-t & 20398.9667 & 20426.0223 & -10195.4834 & 0.9946 \\
+    EGARCH(1,1)-t & 20379.5766 & 20406.6322 & -10185.7883 & 0.9899 \\
+    APARCH(1,1)-t & 20387.3248 & 20421.1442 & -10188.6624 & 0.9250 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Standardized residual statistics across models.}
+  \label{tab:std_resid}
+  \begin{tabular}{lcccc}
+    \toprule
+    模型 & 均值 & 标准差 & 偏度 & 峰度(超额) \\
+    \midrule
+    GARCH(1,1)-N & -0.0067 & 1.0003 & -0.4095 & 4.1046 \\
+    GARCH(1,1)-t & -0.0062 & 0.9924 & -0.4053 & 4.1849 \\
+    EGARCH(1,1)-t & -0.0061 & 0.9954 & -0.4692 & 4.8975 \\
+    APARCH(1,1)-t & -0.0062 & 1.0100 & -0.4152 & 4.2137 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Rolling forecast evaluation metrics.}
+  \label{tab:forecast_eval}
+  \begin{tabular}{lccccc}
+    \toprule
+    模型 & RMSE & MAE & SMAPE(%) & QLIKE & n \\
+    \midrule
+    GARCH(1,1)-N & 0.8340 & 0.6151 & 82.9513 & 0.9381 & 640 \\
+    GARCH(1,1)-t & 0.8404 & 0.6207 & 83.2926 & 0.9369 & 640 \\
+    EGARCH(1,1)-t & 0.8181 & 0.5975 & 82.1727 & 0.9626 & 640 \\
+    APARCH(1,1)-t & 0.8222 & 0.6048 & 82.6125 & 0.9289 & 640 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Diebold-Mariano test for predictive accuracy comparison.}
+  \label{tab:dm_test}
+  \begin{tabular}{lcccc}
+    \toprule
+    模型1 & 模型2 & DM统计量 & DM_p值 & 结论 \\
+    \midrule
+    GARCH(1,1)-N & GARCH(1,1)-t & -2.4198 & 0.0158 & GARCH(1,1)-N 更优** \\
+    GARCH(1,1)-N & EGARCH(1,1)-t & 1.9327 & 0.0537 & EGARCH(1,1)-t 更优* \\
+    GARCH(1,1)-N & APARCH(1,1)-t & 2.3000 & 0.0218 & APARCH(1,1)-t 更优** \\
+    GARCH(1,1)-t & EGARCH(1,1)-t & 3.4601 & 0.0006 & EGARCH(1,1)-t 更优*** \\
+    GARCH(1,1)-t & APARCH(1,1)-t & 5.3838 & 0.0000 & APARCH(1,1)-t 更优*** \\
+    EGARCH(1,1)-t & APARCH(1,1)-t & -1.2291 & 0.2195 & EGARCH(1,1)-t 略优(不显著) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Summary of modeling process.}
+  \label{tab:summary}
+  \begin{tabular}{ll}
+    \toprule
+    Item & Value \\
+    \midrule
+    数据起始 & 2000-01-04 \\
+    数据结束 & 2026-06-08 \\
+    有效观测 & 6399 \\
+    均值方程 & ARIMA (auto_arima选择) \\
+    波动率模型数 & 4 (GARCH-N, GARCH-t, EGARCH-t, APARCH-t) \\
+    样本内最优 & EGARCH(1,1)-t \\
+    最优AIC & 20379.5766 \\
+    样本外最优RMSE & EGARCH(1,1)-t (0.818117) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
