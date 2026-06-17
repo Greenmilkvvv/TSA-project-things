@@ -75,6 +75,11 @@ TSA-project-things/
 - arch (ARCH modeling library)
 - matplotlib
 
+## Skill
+
+- 可视化 skill 参考 [ChenLiu-1996/figures4papers](https://github.com/ChenLiu-1996/figures4papers)
+- 写作 skill 参考 [yanlin-cheng/skill-thesis-writer](https://github.com/yanlin-cheng/skill-thesis-writer)
+
 ## 运行说明
 
 ### 第一步：核心建模
