@@ -130,17 +130,74 @@ def table_descriptive_stats(df: pd.DataFrame):
 
 # ====================== 2. 表格2: 单位根检验 ======================
 def table_unit_root():
-    """表2: ADF & KPSS 单位根检验."""
-    # 直接从已有文件读取
+    """
+    表2: ADF & KPSS 单位根检验。
+    格式: 变量 + 检验方法 + 差分阶数 + 统计量 + p值 + AIC + 临界值(1%/5%/10%)。
+    使用 multirow 合并"变量"和"检验方法"列。
+    """
     df = pd.read_csv(os.path.join(DATA_DIR, 'unit_root_results.csv'), encoding='utf-8-sig')
-    df.columns = ['Test', 'Statistic', 'P-value', '5% Crit.', 'Conclusion']
-    # 只保留关键列
-    df = df[['Test', 'Statistic', 'P-value', 'Conclusion']]
+
+    # 保存一份CSV供查阅
     df.to_csv(os.path.join(TABLE_DIR, 'table_unit_root.csv'),
               index=False, encoding='utf-8-sig')
-    return csv_to_latex(df,
-                        'Unit root test results (ADF \& KPSS).',
-                        'tab:unit_root')
+
+    # ---- 构造 LaTeX 代码（符合用户示例格式）----
+    lines = []
+    lines.append(r"\begin{table}[htbp]")
+    lines.append(r"  \centering")
+    lines.append(r"  \caption{Unit root test results (ADF \& KPSS).}")
+    lines.append(r"  \label{tab:unit_root}")
+    lines.append(r"  \begin{tabular}{lccrrcrrr}")
+    lines.append(r"    \toprule")
+    # 表头
+    lines.append(r"    \multirow{2}{*}{变量} & \multirow{2}{*}{检验方法} & \multirow{2}{*}{差分阶数} "
+                 r"& \multirow{2}{*}{$t$ 统计量} & \multirow{2}{*}{$p$ 值} & \multirow{2}{*}{AIC} "
+                 r"& \multicolumn{3}{c}{临界值} \\")
+    lines.append(r"    \cmidrule(lr){7-9}")
+    lines.append(r"    & & & & & & 1\% & 5\% & 10\% \\")
+    lines.append(r"    \midrule")
+
+    # 分组: 变量名 + 检验方法 用 multirow
+    # 数据按 (变量, 检验方法) 分组
+    grouped = df.groupby(['变量', '检验方法'])
+    for (var_name, method), grp in grouped:
+        n_rows = len(grp)
+        var_cell = f"\\multirow{{{n_rows}}}{{*}}{{{var_name}}}"
+        method_cell = f"\\multirow{{{n_rows}}}{{*}}{{{method}}}"
+        for i, (_, row) in enumerate(grp.iterrows()):
+            var_part = var_cell if i == 0 else ""
+            mt_part = method_cell if i == 0 else ""
+            d = int(row['差分阶数'])
+            stat = row['统计量']
+            pval = row['p值']
+            aic = row['AIC']
+            crit1 = row['临界值1%']
+            crit5 = row['临界值5%']
+            crit10 = row['临界值10%']
+
+            # 格式化数值
+            stat_str = f"{stat:.4f}"
+            pval_str = f"{pval:.4e}" if not pd.isna(pval) else "--"
+            aic_str = f"{aic:.4f}" if not pd.isna(aic) else "--"
+            crit1_str = f"{crit1:.4f}" if not pd.isna(crit1) else "--"
+            crit5_str = f"{crit5:.4f}" if not pd.isna(crit5) else "--"
+            crit10_str = f"{crit10:.4f}" if not pd.isna(crit10) else "--"
+
+            # 显著性标记
+            if not pd.isna(pval) and pval < 0.001:
+                pval_str += "***"
+            elif not pd.isna(pval) and pval < 0.01:
+                pval_str += "**"
+            elif not pd.isna(pval) and pval < 0.05:
+                pval_str += "*"
+
+            lines.append(f"    {var_part} & {mt_part} & {d} & {stat_str} & {pval_str} & {aic_str} "
+                         f"& {crit1_str} & {crit5_str} & {crit10_str} \\\\")
+
+    lines.append(r"    \bottomrule")
+    lines.append(r"  \end{tabular}")
+    lines.append(r"\end{table}")
+    return '\n'.join(lines)
 
 
 # ====================== 3. 表格3: ARCH效应检验 ======================

@@ -38,12 +38,14 @@
   \centering
   \caption{Unit root test results (ADF \& KPSS).}
   \label{tab:unit_root}
-  \begin{tabular}{lccc}
+  \begin{tabular}{lccrrcrrr}
     \toprule
-    Test & Statistic & P-value & Conclusion \\
+    \multirow{2}{*}{变量} & \multirow{2}{*}{检验方法} & \multirow{2}{*}{差分阶数} & \multirow{2}{*}{$t$ 统计量} & \multirow{2}{*}{$p$ 值} & \multirow{2}{*}{AIC} & \multicolumn{3}{c}{临界值} \\
+    \cmidrule(lr){7-9}
+    & & & & & & 1\% & 5\% & 10\% \\
     \midrule
-    ADF & -12.6088 & 0.0000 & 平稳 \\
-    KPSS & 0.0552 & 0.1000 & 平稳 \\
+    \multirow{1}{*}{对数收益率} & \multirow{1}{*}{ADF} & 0 & -12.6088 & 1.6733e-23*** & 22696.4184 & -3.4314 & -2.8620 & -2.5670 \\
+    \multirow{1}{*}{对数收益率} & \multirow{1}{*}{KPSS} & 0 & 0.0552 & 1.0000e-01 & -- & 0.7390 & 0.4630 & 0.3470 \\
     \bottomrule
   \end{tabular}
 \end{table}

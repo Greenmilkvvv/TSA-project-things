@@ -815,6 +815,53 @@ def plot_evaluation_bar(eval_dict, model_names):
 
 
 # =====================================================================
+#  图14: 最优差分序列 ACF/PACF 诊断图
+# =====================================================================
+
+def plot_optimal_diff_acf_pacf():
+    """绘制最优差分阶数序列的 ACF 和 PACF 诊断图（两张单图）"""
+    logger.info("[14] 最优差分序列 ACF/PACF 诊断图")
+
+    df = pd.read_csv(os.path.join(DATA_DIR, 'optimal_diff_series.csv'), encoding='utf-8-sig')
+    series = df['optimal_diff_series'].dropna().values
+    nlags = 40
+    n = len(series)
+    ci95 = 1.96 / np.sqrt(n)
+
+    plot_specs = {
+        'acf':  ('最优差分序列 ACF',  acf(series, nlags=nlags)),
+        'pacf': ('最优差分序列 PACF', pacf(series, nlags=nlags)),
+    }
+
+    filenames = {
+        'acf':  'fig_optimal_diff_acf.pdf',
+        'pacf': 'fig_optimal_diff_pacf.pdf',
+    }
+
+    for key, (title, vals) in plot_specs.items():
+        fig, ax = plt.subplots(figsize=SINGLE_SQ)
+        lags = np.arange(1, len(vals))
+
+        ax.vlines(lags, 0, vals[1:], colors=COLOR_BLACK, linewidths=0.7)
+        ax.plot(lags, vals[1:], 'o', markersize=3,
+                color=COLOR_BLACK, markerfacecolor=COLOR_WHITE,
+                markeredgewidth=0.8)
+
+        ax.axhline(y=0, color=COLOR_REF, linestyle='-', linewidth=0.6)
+        ax.axhline(y=ci95, color=COLOR_DARK, linestyle='--', linewidth=1.5, alpha=0.9)
+        ax.axhline(y=-ci95, color=COLOR_DARK, linestyle='--', linewidth=1.5, alpha=0.9)
+
+        ax.set_xlabel('滞后阶数')
+        ax.set_ylabel('值')
+        ax.set_title(title)
+        ax.set_facecolor(COLOR_WHITE)
+        ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
+        ax.set_xlim(0.5, nlags + 0.5)
+
+        finalize_figure(fig, os.path.join(FIG_DIR, filenames[key]))
+
+
+# =====================================================================
 #  主函数
 # =====================================================================
 
@@ -865,9 +912,12 @@ def main():
     # 图13: 评估指标柱状图
     plot_evaluation_bar(eval_dict, model_names)
 
+    # 图14: 最优差分序列 ACF/PACF 诊断图
+    plot_optimal_diff_acf_pacf()
+
     logger.info("\n" + "=" * 60)
     logger.info(f"全部图表已保存至 {FIG_DIR}/")
-    logger.info(f"共 13 张 PDF 图表")
+    logger.info(f"共 15 张 PDF 图表")
     logger.info("=" * 60)
 
 

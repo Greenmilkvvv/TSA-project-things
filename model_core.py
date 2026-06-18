@@ -90,28 +90,85 @@ def descriptive_stats(df):
 # ====================== 3. 单位根 + ARCH 检验 ======================
 def preliminary_tests(r):
     logger.info("\n" + "=" * 60)
-    logger.info("3. 平稳性与ARCH效应检验")
+    logger.info("3. 平稳性与ARCH效应检验（ADF & KPSS, 差分阶数 0/1/2）")
     logger.info("=" * 60)
-    adf = adfuller(r, regression='c', autolag='AIC')
-    kp = kpss(r, regression='c', nlags='auto')
-    logger.info(f"  ADF: stat={adf[0]:.6f}, p={adf[1]:.6f}, 5%临界值={adf[4]['5%']:.6f}")
-    logger.info(f"  KPSS: stat={kp[0]:.6f}, p={kp[1]:.6f}, 5%临界值={kp[3]['5%']:.6f}")
-    logger.info(f"  >> 结论: 收益率平稳 I(0)")
 
-    # ARCH-LM 检验
+    # ---------- 对差分阶数 0, 1, 2 分别进行 ADF 和 KPSS 检验 ----------
+    ut_rows = []
+
+    optimal_d = 0  # 默认最优差分阶数
+
+    for d in [0, 1, 2]:
+        # 构造 d 阶差分序列
+        if d == 0:
+            series = r
+        elif d == 1:
+            series = np.diff(r)
+        else:
+            series = np.diff(np.diff(r))
+
+        # ---- ADF 检验 ----
+        adf = adfuller(series, regression='c', autolag='AIC')
+        adf_stat = adf[0]
+        adf_p = adf[1]
+        adf_aic = adf[5]  # AIC from autolag selection
+        adf_crit_1 = adf[4]['1%']
+        adf_crit_5 = adf[4]['5%']
+        adf_crit_10 = adf[4]['10%']
+        adf_conclusion = '平稳' if adf_p < 0.05 else '非平稳'
+        ut_rows.append({
+            '变量': '对数收益率', '检验方法': 'ADF', '差分阶数': d,
+            '统计量': adf_stat, 'p值': adf_p, 'AIC': adf_aic,
+            '临界值1%': adf_crit_1, '临界值5%': adf_crit_5, '临界值10%': adf_crit_10,
+            '结论': adf_conclusion
+        })
+        logger.info(f"  ADF(d={d}, n={len(series)}): stat={adf_stat:.6f}, p={adf_p:.6e}, "
+                    f"AIC={adf_aic:.4f}, 1%={adf_crit_1:.4f}, 5%={adf_crit_5:.4f}, 10%={adf_crit_10:.4f} → {adf_conclusion}")
+
+        # ---- KPSS 检验 ----
+        kp = kpss(series, regression='c', nlags='auto')
+        kp_stat = kp[0]
+        kp_p = kp[1]
+        kp_crit_1 = kp[3]['1%']
+        kp_crit_5 = kp[3]['5%']
+        kp_crit_10 = kp[3]['10%']
+        kp_conclusion = '平稳' if kp_p > 0.05 else '非平稳'
+        ut_rows.append({
+            '变量': '对数收益率', '检验方法': 'KPSS', '差分阶数': d,
+            '统计量': kp_stat, 'p值': kp_p, 'AIC': np.nan,
+            '临界值1%': kp_crit_1, '临界值5%': kp_crit_5, '临界值10%': kp_crit_10,
+            '结论': kp_conclusion
+        })
+        logger.info(f"  KPSS(d={d}, n={len(series)}): stat={kp_stat:.6f}, p={kp_p:.6e}, "
+                    f"1%={kp_crit_1:.4f}, 5%={kp_crit_5:.4f}, 10%={kp_crit_10:.4f} → {kp_conclusion}")
+
+        # 判定最优差分阶数：ADF 平稳 且 KPSS 平稳 → d 为最优
+        if adf_conclusion == '平稳' and kp_conclusion == '平稳':
+            optimal_d = d
+            break  # 最小阶数为最优
+
+    logger.info(f"  >> 最优差分阶数 d = {optimal_d} (ADF & KPSS 均平稳)")
+
+    # 保存扩展的单位根检验结果
+    ut_df = pd.DataFrame(ut_rows)
+    ut_df.to_csv(os.path.join(OUT, 'unit_root_results.csv'), index=False, encoding='utf-8-sig')
+    logger.info(f"  单位根检验结果已保存: unit_root_results.csv ({len(ut_df)} 行)")
+
+    # 保存最优差分阶数的序列
+    if optimal_d == 0:
+        optimal_series = r
+    elif optimal_d == 1:
+        optimal_series = np.diff(r)
+    else:
+        optimal_series = np.diff(np.diff(r))
+    pd.DataFrame({'optimal_diff_series': optimal_series}).to_csv(
+        os.path.join(OUT, 'optimal_diff_series.csv'), index=False, encoding='utf-8-sig')
+    logger.info(f"  最优差分序列已保存: optimal_diff_series.csv (d={optimal_d}, n={len(optimal_series)})")
+
+    # ARCH-LM 检验（对原始收益率做）
     arch_lm = het_arch(r - np.mean(r), nlags=10)
     logger.info(f"  ARCH-LM(10): LM={arch_lm[0]:.6f}, p={arch_lm[1]:.6e}")
     logger.info(f"  >> 存在极强的ARCH效应，需GARCH族建模 [OK]")
-
-    # 保存
-    ut_df = pd.DataFrame({
-        '检验': ['ADF', 'KPSS'],
-        '统计量': [adf[0], kp[0]],
-        'p值': [adf[1], kp[1]],
-        '5%临界值': [adf[4]['5%'], kp[3]['5%']],
-        '结论': ['平稳', '平稳']
-    })
-    ut_df.to_csv(os.path.join(OUT, 'unit_root_results.csv'), index=False, encoding='utf-8-sig')
 
     arch_df = pd.DataFrame({
         '检验': ['ARCH-LM lag=10'],
