@@ -853,7 +853,7 @@ def plot_optimal_diff_acf_pacf():
 
         ax.set_xlabel('滞后阶数')
         ax.set_ylabel('值')
-        ax.set_title(title)
+        # ax.set_title(title)
         ax.set_facecolor(COLOR_WHITE)
         ax.grid(True, color=COLOR_GRID, linestyle='--', linewidth=0.4)
         ax.set_xlim(0.5, nlags + 0.5)

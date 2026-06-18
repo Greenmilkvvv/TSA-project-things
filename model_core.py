@@ -96,7 +96,7 @@ def preliminary_tests(r):
     # ---------- 对差分阶数 0, 1, 2 分别进行 ADF 和 KPSS 检验 ----------
     ut_rows = []
 
-    optimal_d = 0  # 默认最优差分阶数
+    optimal_d = None  # 待确定最优差分阶数
 
     for d in [0, 1, 2]:
         # 构造 d 阶差分序列
@@ -142,10 +142,19 @@ def preliminary_tests(r):
         logger.info(f"  KPSS(d={d}, n={len(series)}): stat={kp_stat:.6f}, p={kp_p:.6e}, "
                     f"1%={kp_crit_1:.4f}, 5%={kp_crit_5:.4f}, 10%={kp_crit_10:.4f} → {kp_conclusion}")
 
-        # 判定最优差分阶数：ADF 平稳 且 KPSS 平稳 → d 为最优
-        if adf_conclusion == '平稳' and kp_conclusion == '平稳':
-            optimal_d = d
-            break  # 最小阶数为最优
+        # 判定最优差分阶数：ADF 平稳 且 KPSS 平稳 → d 为候选最优
+        if adf_conclusion == '平稳' and kp_conclusion == '平稳' and optimal_d is None:
+            optimal_d = d  # 取最小阶数
+
+    # 若所有阶数都不满足双检验平稳，取 ADF 平稳的最小阶数
+    if optimal_d is None:
+        for d in [0, 1, 2]:
+            adf_row = next((r for r in ut_rows if r['检验方法'] == 'ADF' and r['差分阶数'] == d), None)
+            if adf_row and adf_row['结论'] == '平稳':
+                optimal_d = d
+                break
+        else:
+            optimal_d = 2  # 最终回退
 
     logger.info(f"  >> 最优差分阶数 d = {optimal_d} (ADF & KPSS 均平稳)")
 
