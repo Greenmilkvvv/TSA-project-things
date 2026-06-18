@@ -220,6 +220,15 @@ def arima_filter(r):
     logger.info(f"  ARIMA残差 ARCH-LM(10): LM={arch_lm_resid[0]:.4f}, p={arch_lm_resid[1]:.6e}")
     logger.info(f"  >> 残差仍存在ARCH效应，需GARCH建模 [OK]")
 
+    # 保存 ARIMA 残差 ARCH-LM 检验结果
+    arch_resid_df = pd.DataFrame({
+        '检验': ['ARCH-LM lag=10 (ARIMA残差)'],
+        '统计量': [arch_lm_resid[0]],
+        'p值': [arch_lm_resid[1]]
+    })
+    arch_resid_df.to_csv(os.path.join(OUT, 'arch_test_arima_resid.csv'), index=False, encoding='utf-8-sig')
+    logger.info(f"  ARIMA残差 ARCH-LM 结果已保存: arch_test_arima_resid.csv")
+
     # 保存 ARIMA 残差中间结果 (供 plot_figures.py 制图)
     r_arr = np.array(resid).flatten()
     pd.DataFrame({'arima_residual': r_arr}).to_csv(

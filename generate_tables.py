@@ -213,7 +213,20 @@ def table_arch_test():
                         'tab:arch_test')
 
 
-# ====================== 4. 表格4: ARIMA残差白噪声检验 ======================
+# ====================== 4. 表格4: ARIMA残差 ARCH-LM 检验 ======================
+def table_arch_test_arima_resid():
+    """表4: ARIMA残差的 ARCH-LM 检验."""
+    df = pd.read_csv(os.path.join(DATA_DIR, 'arch_test_arima_resid.csv'), encoding='utf-8-sig')
+    df.columns = ['Test', 'Statistic', 'P-value']
+    df = df[['Test', 'Statistic', 'P-value']]
+    df.to_csv(os.path.join(TABLE_DIR, 'table_arch_test_arima_resid.csv'),
+              index=False, encoding='utf-8-sig')
+    return csv_to_latex(df,
+                        'ARCH-LM test on ARIMA residuals (lag=10).',
+                        'tab:arch_arima_resid')
+
+
+# ====================== 5. 表格5: ARIMA残差白噪声检验 ======================
 def table_arima_residual():
     """表4: ARIMA 残差 Ljung-Box 白噪声检验."""
     arima_df = pd.read_csv(os.path.join(DATA_DIR, 'arima_residuals.csv'), encoding='utf-8-sig')
@@ -375,31 +388,35 @@ def main():
     print("  ✓ ARCH效应检验  →  table_arch_test.csv")
     latex_parts.append(table_arch_test())
     
-    # 表4
+    # 表4: ARIMA残差 ARCH-LM 检验
+    print("  ✓ ARIMA残差ARCH-LM检验  →  table_arch_test_arima_resid.csv")
+    latex_parts.append(table_arch_test_arima_resid())
+
+    # 表5: ARIMA残差白噪声检验
     print("  ✓ ARIMA残差白噪声检验  →  table_arima_residual.csv")
     latex_parts.append(table_arima_residual())
     
-    # 表5
+    # 表6
     print("  ✓ 模型参数估计  →  table_model_parameters.csv")
     latex_parts.append(table_model_parameters())
     
-    # 表6
+    # 表7
     print("  ✓ 模型信息准则比较  →  table_model_comparison.csv")
     latex_parts.append(table_model_comparison())
     
-    # 表7
+    # 表8
     print("  ✓ 标准化残差统计  →  table_std_residuals.csv")
     latex_parts.append(table_std_residuals())
     
-    # 表8
+    # 表9
     print("  ✓ 滚动预测评估  →  table_forecast_eval.csv")
     latex_parts.append(table_forecast_eval())
     
-    # 表9
+    # 表10
     print("  ✓ Diebold-Mariano检验  →  table_dm_test.csv")
     latex_parts.append(table_dm_test())
     
-    # 表10
+    # 表11
     print("  ✓ 建模流程摘要  →  table_final_summary.csv")
     latex_parts.append(table_final_summary())
     
